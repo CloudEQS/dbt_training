@@ -1,0 +1,26 @@
+version: 2
+sources:
+  - name: raw
+    database: AwsDataCatalog
+    schema: dbt_training
+    tables:
+      - name: account
+      - name: patients
+      - name: procedures
+      - name: claims
+      - name: opportunity
+        loaded_at_field: cast(lastmodifieddate as timestamp) 
+        description: Salesforce opportunity records — primary revenue pipeline table.
+        freshness:
+          warn_after: {count: 5, period: day}
+          error_after: {count: 10, period: day} #minute,hour,day
+      - name: opportunitylineitem      
+      - name: product
+      - name: user
+
+  - name: raw_bronze
+    database: AwsDataCatalog
+    schema: dbt_training_bronze
+
+    tables:    
+      - name: opportunitylineitem

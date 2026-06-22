@@ -1,0 +1,9 @@
+version: 2
+
+snapshots:
+  - name: sfdc_opportunity_snapshots
+    columns:
+      - name: id
+        tests:
+          - not_null
+          - unique

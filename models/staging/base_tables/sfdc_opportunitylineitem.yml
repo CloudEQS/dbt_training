@@ -1,0 +1,9 @@
+version: 2
+
+models:
+  - name: sfdc_opportunitylineitem
+    columns:
+      - name: id
+        data_tests:
+          - not_null
+          - unique

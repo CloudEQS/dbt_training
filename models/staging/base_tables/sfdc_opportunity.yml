@@ -1,0 +1,9 @@
+version: 2
+
+models:
+  - name: sfdc_opportunity
+    columns:
+      - name: opportunity_id
+        data_tests:
+          - not_null
+          - unique
