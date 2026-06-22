@@ -1,0 +1,9 @@
+version: 2
+models:
+  - name: sfdc_opportunity_set
+    columns:
+      - name: is_won
+        data_tests:
+          - accepted_values:
+              values: [true, false]
+              quote: false

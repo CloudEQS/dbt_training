@@ -1,0 +1,35 @@
+name: dbt_training 
+version: '1.0.0' 
+profile: dbt_training 
+
+model-paths: ['models'] 
+seed-paths: ['seeds'] 
+test-paths: ['tests'] 
+
+models: 
+  dbt_training:         
+    base_tables:          
+      +materialized: table
+      +table_type: iceberg       
+      +s3_data_naming: schema_table_unique
+      20_silver:          
+        +s3_data_dir: "{{ 's3://healthcare-prod/silver/' if target.name == 'prod' else 's3://healthcare-uat/silver/' if target.name == 'uat' else 's3://dbt-training-datalake-336136505312-us-east-2-an/iceberg/Silver/' }}"    
+      30_gold:         
+        +s3_data_dir: "{{ 's3://healthcare-prod/silver/' if target.name == 'prod' else 's3://healthcare-uat/silver/' if target.name == 'uat' else 's3://dbt-training-datalake-336136505312-us-east-2-an/iceberg/Gold/' }}"    
+            
+    base_views:          
+      +materialized: views
+
+    staging:
+      +materialized: table
+      +s3_data_naming: schema_table_unique
+      +table_type: iceberg      
+      +s3_data_dir: "{{ 's3://healthcare-prod/silver/' if target.name == 'prod' else 's3://healthcare-uat/silver/' if target.name == 'uat' else 's3://dbt-training-datalake-336136505312-us-east-2-an/iceberg/staging/' }}"    
+      
+      
+seeds:
+  my_project:
+  +table_type: iceberg 
+
+vars:
+  iceberg_base_location: "s3://dbt-training-datalake-336136505312-us-east-2-an/iceberg/staging"

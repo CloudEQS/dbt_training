@@ -1,0 +1,9 @@
+version: 2
+
+models:
+  - name: sfdc_opportunitylineitem_expression_is_true
+    data_tests:
+      - dbt_utils.expression_is_true:
+          expression: >-
+            edw_load_datetime_et >= current_timestamp - interval '1' day
+          where: "id is not null and edw_load_datetime_et is not null"

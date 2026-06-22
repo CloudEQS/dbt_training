@@ -1,0 +1,25 @@
+version: 2
+
+models:
+  - name: v_rpt_account
+    description: "Published reporting view exposing account data from the accounts_merge model."
+    config:
+      tags: account_view
+    columns:
+      - name: accountnumber
+        description: "Unique account number identifier."
+      - name: id
+        description: "Salesforce account record ID."
+        tests:
+          - not_null
+          - unique
+      - name: created_date
+        description: "Date the account record was created."
+      - name: name
+        description: "Name of the account."
+      - name: type
+        description: "Account type classification."
+      - name: recordtypeid
+        description: "Salesforce record type ID associated with the account."
+      - name: parentid
+        description: "ID of the parent account, if applicable."

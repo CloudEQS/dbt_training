@@ -1,0 +1,57 @@
+version: 2
+
+models:
+  - name: sfdc_opportunitylineitem
+    data_tests:
+      - dbt_utils.expression_is_true:
+          expression: >-
+            edw_load_datetime_et >= current_timestamp - interval '1' day
+          where: "id is not null and edw_load_datetime_et is not null"
+
+      - dbt_expectations.expect_table_row_count_to_equal_other_table:
+          compare_model: "{{ source('raw', 'opportunitylineitem') }}"
+
+    columns:
+      - name: id
+        data_tests:
+          - not_null
+          - unique
+          - dbt_expectations.expect_column_distinct_count_to_equal_other_table:
+              compare_model: "{{ source('raw', 'opportunitylineitem') }}"
+              compare_column_name: id
+
+      - name: opportunity_id
+        data_tests:
+          - not_null
+          # relationships_where — no 'arguments' wrapper
+          - dbt_utils.relationships_where:
+              to: ref('sfdc_opportunity')
+              field: opportunity_id
+              from_condition: "edw_load_datetime_et < current_timestamp - interval '2' hour"
+              to_condition: "opportunity_id is not null"
+          
+          # cardinality_equality — no 'arguments' wrapper
+          - dbt_utils.cardinality_equality:
+              field: opportunity_id
+              to: ref('sfdc_opportunity')
+              config:
+                severity: warn
+                
+      - name: product_id
+        data_tests:
+          - not_null:
+              config:
+                severity: warn
+
+      - name: totalprice
+        data_tests:
+          - dbt_utils.expression_is_true:
+              expression: ">= 0"
+              config:
+                severity: warn
+
+      - name: is_deleted
+        data_tests:
+          - accepted_values:
+              values: [true, false]
+              quote: false

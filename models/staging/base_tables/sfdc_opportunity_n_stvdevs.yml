@@ -1,0 +1,12 @@
+version: 2
+
+models:
+  - name: sfdc_opportunity_n_stvdevs
+    data_tests:
+
+      - name: amount
+        data_tests:
+          - assert_total_amount_is_positive
+          # anomaly detection test:(Any opportunity amount more than 3 standard deviations from the average gets flagged for review.)     
+          - dbt_expectations.expect_column_values_to_be_within_n_stdevs:
+              sigma_threshold: 3

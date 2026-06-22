@@ -1,0 +1,40 @@
+version: 2
+
+models:
+  - name: sfdc_opportunity
+    data_tests:
+    columns:
+      - name: opportunity_id
+        data_tests:
+          - not_null
+          - unique
+    
+    # accepted values test
+      - name: stage
+        data_tests:
+          - accepted_values:
+              values:
+                - 'Qualify'
+                - '7-Closed Lost'
+                - 'Evaluate'
+                - '5-Negotiate'
+                - 'Discover'
+                - '8-QFA Disqualified'
+                - '4-Propose'
+                - '1-Discover'
+                - '2-Qualify'
+                - 'Propose'
+                - '6-Closed Won'
+                - '3-Evaluate'
+
+   # expect_column_values_to_be_in_set
+      - name: is_won
+        data_tests:
+          - accepted_values:
+              values: [true, false]
+              quote: false
+
+      - name: account_id
+        data_tests:
+          - not_null:
+              severity: warn

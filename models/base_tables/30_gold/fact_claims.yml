@@ -1,0 +1,20 @@
+version: 2
+
+models:
+  - name: fact_claims
+    description: "gold-layer fact table joining patient demographics with claim amounts."
+    config:
+      table_type: iceberg
+    columns:
+      - name: contact_0_name_family
+        description: "patient's family (last) name from the primary contact."
+      - name: contact_0_name_given_0
+        description: "patient's given (first) name from the primary contact."
+      - name: status
+        description: "status of the claim."
+      - name: claim_amount
+        description: "concatenation of the claim's currency code and total value."
+      - name: identifier_0_value
+        description: "claim identifier value."
+        tests:
+          - not_null

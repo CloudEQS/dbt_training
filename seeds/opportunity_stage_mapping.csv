@@ -1,0 +1,11 @@
+stage_name,stage_order,probability,is_closed,is_won
+Prospecting,1,10,false,false
+Qualification,2,20,false,false
+Needs Analysis,3,30,false,false
+Value Proposition,4,40,false,false
+Id. Decision Makers,5,50,false,false
+Perception Analysis,6,60,false,false
+Proposal/Price Quote,7,70,false,false
+Negotiation/Review,8,80,false,false
+Closed Won,9,100,true,true
+Closed Lost,10,0,true,false

@@ -1,0 +1,24 @@
+version: 2
+
+sources:
+  - name: raw
+    database: AwsDataCatalog
+    schema: dbt_training
+    loaded_at_field: SystemModstamp
+    freshness:
+      warn_after: {count: 24, period: hour}
+      error_after: {count: 48, period: hour}
+
+    tables:
+      - name: account
+      - name: patients
+      - name: procedures
+      - name: claims
+      - name: opportunity
+        description: Salesforce opportunity records — primary revenue pipeline table.
+        freshness:
+          warn_after: {count: 12, period: hour}
+          error_after: {count: 24, period: hour}
+      - name: opportunitylineitem
+      - name: product
+      - name: user

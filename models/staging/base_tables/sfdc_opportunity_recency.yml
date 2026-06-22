@@ -1,0 +1,14 @@
+models:
+  - name: sfdc_opportunity_recency
+    data_tests:
+      - dbt_utils.recency:
+          datepart: day
+          field: edw_load_datetime_et
+          interval: 7
+          group_by_columns: [record_type_id]
+          config:
+            severity: warn
+
+
+
+

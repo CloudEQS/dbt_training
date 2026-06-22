@@ -1,0 +1,27 @@
+version: 2
+
+models:
+  - name: sfdc_opportunitylineitem_integrity_cardinality
+    columns:
+       - name: opportunity_id
+         data_tests:
+          - not_null
+          # relationships_where — no 'arguments' wrapper
+          - dbt_utils.relationships_where:
+              to: ref('sfdc_opportunity')
+              field: opportunity_id
+              from_condition: "edw_load_datetime_et < current_timestamp - interval '2' hour"
+              to_condition: "opportunity_id is not null"
+              config:
+                severity: warn
+
+          - dbt_utils.cardinality_equality:
+              field: opportunity_id
+              to: ref('sfdc_opportunity')
+              config:
+                severity: warn
+
+
+
+
+
