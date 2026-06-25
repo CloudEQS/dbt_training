@@ -1,0 +1,14 @@
+version: 2
+
+models:
+  - name: fact_opportunity_bookings_accepted_values
+    columns:
+      - name: stage
+        data_tests:
+          - accepted_values:
+              values:
+                - Prospecting
+                - Qualification
+                - Proposal
+                - Closed Won
+                - Closed Lost

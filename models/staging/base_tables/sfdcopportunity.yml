@@ -1,7 +1,7 @@
 version: 2
 
 models:
-  - name: sfdc_opportunity    
+  - name: sfdcopportunity    
     columns:
       - name: opportunity_id
         data_tests:

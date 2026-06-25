@@ -1,0 +1,12 @@
+version: 2
+ 
+models:
+  - name: sfdc_opportunity_generic_test
+ 
+    columns:
+      - name: amount
+        data_tests:
+          - assert_total_amount_is_positive
+      - name: quantity
+        data_tests:
+          - assert_total_amount_is_positive

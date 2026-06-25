@@ -1,0 +1,12 @@
+version: 2
+
+models:
+  - name: fact_opportunity_bookings_generic_test
+    columns:
+      - name: amount
+        data_tests:
+          - positive_amount
+
+      - name: partialgrowthamount
+        data_tests:
+          - positive_amount

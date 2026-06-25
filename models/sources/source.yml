@@ -22,3 +22,11 @@ sources:
       - name: opportunitylineitem
       - name: product
       - name: user
+
+
+  - name: raw_bronze
+    database: AwsDataCatalog
+    schema: dbt_training_bronze
+
+    tables:    
+      - name: opportunitylineitem
