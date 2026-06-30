@@ -1,5 +1,5 @@
 def model(dbt, session):
-    dbt.config(materialized="table", table_type="hive")
+    dbt.config(materialized="table")
 
     customers = dbt.ref("stg_customers_py")
     orders = dbt.ref("stg_orders_py")

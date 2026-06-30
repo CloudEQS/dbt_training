@@ -1,62 +1,69 @@
-import requests
+import boto3
 import json
+import requests
 import pandas as pd
 from datetime import datetime, timedelta
-import _snowflake
-import snowflake.snowpark as snowpark
 import logging
+from pyspark.sql.types import StructType
+from pyspark.sql.types import NullType, StringType, ArrayType
+from pyspark.sql import functions as F
 
-#set API Key,limit,headers
 logger = logging.getLogger('failed_dbt_logger')
-api_key = _snowflake.get_generic_secret_string("cred")
-limit = 100
-headers = {
-    "Authorization": f"Bearer {api_key}",
-    "Content-Type": "application/json"
-}
 
-# create a session for making API requests
-# define the call_api function to retrieve data from the APT
+ACCOUNT_ID = 179022
+LIMIT = 100
 
-def call_api(status, time_input_start, time_input_end):
+def get_secret():
+    client = boto3.client("secretsmanager", region_name="us-east-2") 
+    secret = client.get_secret_value(
+        SecretId="cloudeqs_lab_credentials"
+    )
+    return json.loads(secret["SecretString"])
+
+def call_api(status, time_input_start, time_input_end, headers):
     all_runs = []
     offset = 0
     while True:
-        # set the parameters for the API request
         params = {
-            "limit": limit,
+            "limit": LIMIT,
             "offset": offset,
             "status": status
         }
-        url = f"https://cloud.getdbt.com/api/v2/accounts/179022/runs?finished_at__range=['{time_input_start}','{time_input_end}']"
-        resp = requests.request('GET',url=url,headers=headers,params=params,verify = False)
+        url = f"https://cloud.getdbt.com/api/v2/accounts/{ACCOUNT_ID}/runs?finished_at__range=['{time_input_start}','{time_input_end}']"
+        resp = requests.request('GET', url=url, headers=headers, params=params, verify=False)
         data = resp.json()
-        all_runs.extend(data.get('data'))
-        if len(data.get("data", [])) < limit:
+        all_runs.extend(data.get('data', []))
+        if len(data.get("data", [])) < LIMIT:
             break
-        offset += limit
+        offset += LIMIT
     df = pd.DataFrame(all_runs)
     if not df.empty:
         df["dbt_last_refreshed_timestamp"] = datetime.now()
-        return df
-    else:
-        return df
+    return df
 
-# Define the model function, required by DBT
-def model(dbt, session: snowpark.Session):
+def model(dbt, session):
     dbt.config(
         materialized="incremental",
         unique_key=["id"],
-        python_version="3.8",
-        packages=["pandas", "requests"],
-        tags=" "
     )
-# Get the current time and 24 hours ago
+    creds = get_secret()
+    headers = {
+        "Authorization": f"Bearer {creds['cx_dbt_api_token']}"
+    }
     time_input_start = (datetime.now().replace(hour=0, minute=0, second=0) - timedelta(days=1)).strftime('%Y-%m-%d %H:%M:%S')
     time_input_end = datetime.now().replace(hour=0, minute=0, second=0).strftime('%Y-%m-%d %H:%M:%S')
-# Call the API and get the resulting DataFrame
-    df_result = call_api(status=20, time_input_start=time_input_start, time_input_end=time_input_end)
-# if not df_result.empty:
-    df_result = df_result[df_result['environment_id'].isin([225411, 228384, 251155])]
-    df_result.columns=df_result.columns.str.upper()
-    return df_result
+
+    df_result = call_api(status=20, time_input_start=time_input_start, time_input_end=time_input_end, headers=headers)
+    
+    if df_result.empty:
+        return session.createDataFrame([], StructType([]))
+    spark_df = session.createDataFrame(df_result)
+    spark_df = spark_df.toDF(*[c.upper() for c in spark_df.columns])
+    # spark_df = spark_df.filter(spark_df.ENVIRONMENT_ID.isin(ENVIRONMENT_IDS))
+
+    for field in spark_df.schema.fields:
+        if isinstance(field.dataType, NullType):
+            spark_df = spark_df.withColumn(field.name, F.col(field.name).cast(StringType()))
+        elif isinstance(field.dataType, ArrayType) and isinstance(field.dataType.elementType, NullType):
+            spark_df = spark_df.withColumn(field.name, F.col(field.name).cast(ArrayType(StringType())))
+    return spark_df

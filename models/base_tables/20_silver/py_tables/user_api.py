@@ -4,8 +4,7 @@ import requests
 def model(dbt, session):
 
     dbt.config(
-        materialized="table",
-        table_type="hive"
+        materialized="table"     
     )
 
     # Call REST API

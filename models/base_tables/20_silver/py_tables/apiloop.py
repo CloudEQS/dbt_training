@@ -1,4 +1,6 @@
 import requests
+import pandas as pd
+from pyspark.sql.functions import current_timestamp, lit
 
 
 def model(dbt, session):
@@ -11,31 +13,42 @@ def model(dbt, session):
     limit = 100
     skip = 0
 
-    all_products = []
+    all_posts = []
 
     while True:
 
-        url = f"https://dummyjson.com/products?limit={limit}&skip={skip}"
+        url = f"https://dummyjson.com/posts?limit={limit}&skip={skip}"
 
         response = requests.get(url, timeout=30)
         response.raise_for_status()
 
         result = response.json()
 
-        products = result["products"]
+        posts = result["posts"]
 
-        if not products:
+        if len(posts) == 0:
             break
 
-        all_products.extend(products)
+        all_posts.extend(posts)
 
-        print(f"Fetched {len(products)} records (skip={skip})")
+        print(f"Fetched {len(posts)} records")
 
         skip += limit
 
         if skip >= result["total"]:
             break
 
-    df = session.createDataFrame(all_products)
+    # Convert JSON list to Pandas DataFrame
+    pdf = pd.DataFrame(all_posts)
+
+    # Convert Pandas to Spark DataFrame
+    df = session.createDataFrame(pdf)
+
+    # Add audit columns
+    df = (
+        df
+        .withColumn("source_system", lit("DummyJSON"))
+        .withColumn("load_timestamp", current_timestamp())
+    )
 
     return df
