@@ -1,3 +1,5 @@
-{{ config(tag="account") }}
+{{ 
+  config(tag="account")
+}}
 
 select * from {{ ref('py_mdl') }}
