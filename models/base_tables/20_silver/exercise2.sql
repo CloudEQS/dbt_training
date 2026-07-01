@@ -4,8 +4,8 @@
     materialized='incremental',
     table_type='iceberg',
     incremental_strategy='append',
-     post_hook=[
-            log_etl_run(this, process_date)
+    post_hook=[
+            "{{ log_etl_run(process_date) }}"
         ]
 ) }}
 

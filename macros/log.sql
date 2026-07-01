@@ -1,4 +1,4 @@
-{% macro log_etl_run(table_name, process_date) %}
+{% macro log_etl_run(process_date) %}
 
 INSERT INTO {{ ref('etl_log') }}
 (
@@ -10,13 +10,13 @@ INSERT INTO {{ ref('etl_log') }}
 )
 
 SELECT
-    '{{ table_name.identifier }}',
+    '{{ this.identifier }}',
     '{{ process_date }}',
     current_timestamp,
     count(*),
     'SUCCESS'
 
-FROM {{ table_name }}
+FROM {{ this }}
 
 WHERE process_date='{{ process_date }}';
 
