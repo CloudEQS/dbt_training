@@ -1,10 +1,5 @@
-{{ config(
-    tags=['mdl_daily'],
-    materialized='incremental',        -- avoids full table rebuild; processes only new/changed rows each run, cutting compute cost and runtime
-    incremental_strategy='merge',      -- MERGE (upsert) on unique_key instead of append/delete+insert; keeps one row per user, updates in place
-    unique_key='id',                   -- column dbt uses to match existing rows during merge
-    table_type='iceberg',              -- Iceberg format gives ACID transactions, time travel, schema evolution, and native compaction/vacuum support on Athena
-    format='parquet',                  -- columnar storage; faster scans + better compression than row formats like CSV/JSON
+{#
+    
     write_compression='zstd',          -- higher compression ratio than snappy/gzip at similar CPU cost -> smaller files, less S3 storage, faster reads
     table_properties={
         'optimize_rewrite_delete_file_threshold': '2',   -- after 2 delete files accumulate on a data file, auto-trigger compaction to merge them away
@@ -16,7 +11,31 @@
         "OPTIMIZE {{ this }} REWRITE DATA USING BIN_PACK",  -- runs after every load: bin-packs small files into fewer, right-sized files -> fewer S3 GET requests, faster downstream queries
         "VACUUM {{ this }}"                                 -- runs after every load: expires old snapshots and removes orphaned data files per the thresholds above, keeping storage costs down
     ]
-) }}
+
+#}
+
+{{
+
+config(
+    tags=['mdl_daily'],
+    materialized='incremental',      
+    incremental_strategy='merge',    
+    unique_key='id',                 
+    table_type='iceberg',            
+    format='parquet',                
+    write_compression='zstd',        
+    table_properties={
+        'optimize_rewrite_delete_file_threshold': '2',  
+        'optimize_rewrite_data_file_threshold': '5',    
+        'vacuum_min_snapshots_to_keep': '5',            
+        'vacuum_max_snapshot_age_seconds': '259200'     
+    },
+    post_hook=[
+        "OPTIMIZE {{ this }} REWRITE DATA USING BIN_PACK",  
+        "VACUUM {{ this }}"                                 
+    ]
+) 
+}}
 
 with users as (
     select *

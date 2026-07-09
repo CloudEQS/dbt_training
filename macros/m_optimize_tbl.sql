@@ -1,9 +1,8 @@
 {% macro optimize_all_tables() %}
 
 {% set models = [
-    'customer_history',
-    'sales_history',
-    'product_history'
+    'dim_user',
+    'fact_claims'    
 ] %}
 
 {% for model in models %}

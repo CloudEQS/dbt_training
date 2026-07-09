@@ -1,11 +1,8 @@
 {{
 config(
-    materialized='table',
-    post_hook=[
-        "MSCK REPAIR TABLE {{ this }}"
-    ]
+    materialized='table'
 )
 }}
 
 select *
-from {{ ref('mdl_S3') }}
+from {{ ref('mdl_s3') }}
