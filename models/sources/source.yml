@@ -2,8 +2,8 @@ version: 2
 
 sources:
   - name: raw
-    database: AwsDataCatalog
-    schema: dbt_training
+    database: "{{ 'AwsDataCatalog_prod' if target.name == 'prod' else 'AwsDataCatalog_uat' if target.name == 'uat' else 'AwsDataCatalog' }}"          
+    schema:  "{{ 'dbt_training_prod' if target.name == 'prod' else 'dbt_training_uat' if target.name == 'uat' else 'dbt_training' }}"          
     loaded_at_field: SystemModstamp
     freshness:
       warn_after: {count: 24, period: hour}
@@ -24,9 +24,9 @@ sources:
       - name: user
 
 
-  - name: raw_bronze
-    database: AwsDataCatalog
-    schema: dbt_training_bronze
+  - name: raw_bronze    
+    database: "{{ 'AwsDataCatalog_prod' if target.name == 'prod' else 'AwsDataCatalog_uat' if target.name == 'uat' else 'AwsDataCatalog' }}"          
+    schema:  "{{ 'dbt_training_prod' if target.name == 'prod' else 'dbt_training_uat' if target.name == 'uat' else 'dbt_training_bronze' }}"          
 
     tables:    
       - name: opportunitylineitem

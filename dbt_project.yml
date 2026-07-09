@@ -12,10 +12,12 @@ models:
       +materialized: table
       +table_type: iceberg       
       +s3_data_naming: schema_table_unique
-      20_silver:          
+      20_silver:
+        +tags: "silver_layer"          
         +s3_data_dir: "{{ 's3://healthcare-prod/silver/' if target.name == 'prod' else 's3://healthcare-uat/silver/' if target.name == 'uat' else 's3://dbt-training-datalake-336136505312-us-east-2-an/iceberg/Silver/' }}"    
         py_tables:
           +table_type: hive
+          +s3_data_dir: "{{ 's3://healthcare-prod/hive_silver/' if target.name == 'prod' else 's3://healthcare-uat/silver/' if target.name == 'uat' else 's3://dbt-training-datalake-336136505312-us-east-2-an/iceberg/Silver/' }}"    
       30_gold:         
         +s3_data_dir: "{{ 's3://healthcare-prod/silver/' if target.name == 'prod' else 's3://healthcare-uat/silver/' if target.name == 'uat' else 's3://dbt-training-datalake-336136505312-us-east-2-an/iceberg/Gold/' }}"    
             
@@ -24,6 +26,7 @@ models:
 
     staging:
       +materialized: table
+      +tags: ["staging", "intermediate"]
       +s3_data_naming: schema_table_unique
       +table_type: iceberg      
       +s3_data_dir: "{{ 's3://healthcare-prod/silver/' if target.name == 'prod' else 's3://healthcare-uat/silver/' if target.name == 'uat' else 's3://dbt-training-datalake-336136505312-us-east-2-an/iceberg/staging/' }}"    
